@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import json
 
 # Flame functions
 def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
@@ -13,7 +14,7 @@ def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
     return flame_speed
 
 def calculate_1d_points_in_grid(grid_LB, grid_RB, flame_thickness, n_flame_points):
-    """Calculates the number of required points in a grid when 
+    """Calculates the number of required points in a grid when
     a specific number of points is desidered within the flame front."""
     grid_length = grid_RB - grid_LB
     delta_x = flame_thickness / n_flame_points
@@ -32,3 +33,49 @@ def df_paraview_to_fg(df, dim=3):
         if col in df_cols:
             df = df.rename(columns={col: fg_col})
     return df 
+
+# FG
+def read_json(path_json):
+    with open(path_json) as f:
+        dict_json = json.load(f)
+    return dict_json
+
+
+def get_composition_from_dict(dictionary):
+
+    _values = list(dictionary.values())
+    _keys = list(dictionary.keys())    
+    
+    out_str = f"{_keys[0]}:{_values[0]}"
+    for k, v in zip(_keys[1:], _values[1:]):
+        out_str += f", {k}:{v}"
+    return out_str
+
+def gas_from_fg(fg_dict):
+    """Creates a gas object from a FlameGenInputFile.json file."""
+    equivalence_ratio = None
+
+    # Read thermodynamic and transport data from FlameGen input file
+    temperature = fg_dict["HeatLossData"]["Tf"]
+    pressure = fg_dict["ChemistryData"]["pressure"]
+    solution = fg_dict["ChemistryData"]["mechanism"]
+
+    # Creates gas object based on FlameGen input file
+    gas = ct.Solution(solution)
+
+    # Read fuel and oxidizer composition from FlameGen input file
+    _fuel = fg_dict["ChemistryData"]["fuelX"]
+    _oxidizer = fg_dict["ChemistryData"]["oxidizerX"]
+
+    fuel = get_composition_from_dict(_fuel)
+    oxidizer = get_composition_from_dict(_oxidizer)
+    reactants = fuel + ", " + oxidizer
+    gas.TPX = temperature, pressure, reactants
+    
+    if fg_dict["FlameletTypeData"]["mixApproach"] == "phi":
+        equivalence_ratio = fg_dict["FlameletTypeData"]["mixMethod"]
+        gas.set_equivalence_ratio(equivalence_ratio, fuel=fuel, oxidizer=oxidizer)
+    else:
+        raise ValueError("Code only defined for phi mixing flamelet data")
+
+    return gas
