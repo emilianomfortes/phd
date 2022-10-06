@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import json
+import cantera as ct
 
 # Flame functions
 def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
