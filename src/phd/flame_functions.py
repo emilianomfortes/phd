@@ -12,7 +12,7 @@ def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
         flame_speed = (v_b - v_u) / (rho_u / rho_b - 1)
     return flame_speed
 
-def calculate_1d_points_in_grid(grid_LB, grid_RB, flame_thickness, n_flame_points)
+def calculate_1d_points_in_grid(grid_LB, grid_RB, flame_thickness, n_flame_points):
     """Calculates the number of required points in a grid when 
     a specific number of points is desidered within the flame front."""
     grid_length = grid_RB - grid_LB
