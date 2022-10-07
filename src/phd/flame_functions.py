@@ -4,7 +4,6 @@ import json
 import cantera as ct
 
 # Calculate quantities
-# Flame functions
 def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
     """Calculates the laminar flame speed s_l for a 1d flame."""
     if stationary:
@@ -20,6 +19,7 @@ def calc_progress_var_df(df_flamelet, Yc_species, Yc_weights):
     for (_species,_weights) in zip(Yc_species, Yc_weights):
         Yc_array += _weights*df_flamelet[_species].to_numpy()
     return Yc_array
+
 def calculate_1d_points_in_grid(grid_LB, grid_RB, flame_thickness, n_flame_points):
     """Calculates the number of required points in a grid when
     a specific number of points is desidered within the flame front."""
@@ -33,7 +33,7 @@ def calculate_1d_points_in_grid(grid_LB, grid_RB, flame_thickness, n_flame_point
 def df_paraview_to_fg(df, dim=3):
     """Translates column names from paraview .csv file to fg format"""
     possible_cols = ["VELOC:0", "Points:0", "DENSI", "TEMPE", "ZMEAN", "CMEAN"]
-    flamegen_cols = ["u(m/s)", "x(m)", f"rho(kg/{dim})", "T(K)", "Z", "C"]
+    flamegen_cols = ["u(m/s)", "x(m)", f"rho(kg/m^{dim})", "T(K)", "Z", "C"]
     df_cols = list(df.columns)
 
     for col, fg_col in zip(possible_cols, flamegen_cols):
