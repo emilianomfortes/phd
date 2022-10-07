@@ -3,6 +3,7 @@ import pandas as pd
 import json
 import cantera as ct
 
+# Calculate quantities
 # Flame functions
 def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
     """Calculates the laminar flame speed s_l for a 1d flame."""
@@ -14,6 +15,11 @@ def laminar_flame_speed(v_u, v_b, rho_u, rho_b, stationary=False):
         flame_speed = (v_b - v_u) / (rho_u / rho_b - 1)
     return flame_speed
 
+def calc_progress_var_df(df_flamelet, Yc_species, Yc_weights):
+    Yc_array = np.zeros_like(df_flamelet["u(m/s)"].to_numpy())
+    for (_species,_weights) in zip(Yc_species, Yc_weights):
+        Yc_array += _weights*df_flamelet[_species].to_numpy()
+    return Yc_array
 def calculate_1d_points_in_grid(grid_LB, grid_RB, flame_thickness, n_flame_points):
     """Calculates the number of required points in a grid when
     a specific number of points is desidered within the flame front."""
